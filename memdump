@@ -1,0 +1,56 @@
+#!/bin/sh
+
+# $1 - PID of process to dump memory of
+
+incorrect() {
+  echo "Incorrect PID: '$1'."
+  exit 1
+  }
+
+nums_only=$(echo "$1" | grep -v '[^0-9]')
+if [ -z "$1" ] || [ "$nums_only" != "$1" ] || ! [ "$1" -gt 0 ]; then
+  incorrect "$1";
+  fi
+
+if ! [ -f "/proc/$1/maps" ]; then
+  echo "/proc/$1/maps: No such file or directory"
+  exit 1
+  fi
+
+maps=$(cat /proc/"$1"/maps | grep 'rw-p')
+if ! [ $(echo "$maps" | wc -l) -gt 0 ]; then
+  echo "No maps to select from."
+  exit 0
+  fi
+
+map=$(echo "$maps" | percol)
+
+map_name=$(echo "$map" | awk '{print $6}' | sed -e 's|/|--|g')
+filename="$1"
+if ! [ -z "$map_name" ]; then
+  filename="$filename.$map_name"
+  fi
+
+filename="$filename.mem"
+
+echo "$filename"
+
+if [ -f "$filename" ]; then
+  echo -n "Will overwrite $filename, press Enter to continue."
+  tty_settings=$(stty -g)
+  stty -echo
+  read key; # $key is never used, but must be given to read because Posix
+  stty "$tty_settings"
+  echo
+  fi
+
+range='s/^\([0-9a-f]*\)-\([0-9a-f]*\) .*$/\1 \2/p'
+start_stop=$(echo "$map" | sed -n "$range")
+start=$(echo "$start_stop" | grep -o '^[^ ]\+')
+stop=$( echo "$start_stop" | grep -o '[^ ]\+$')
+
+gdb 2>/dev/null 1>&2 \
+  -q --batch --pid "$1" \
+  -ex "dump memory $filename 0x$start 0x$stop" \
+
+exit $?
