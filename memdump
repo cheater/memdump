@@ -45,8 +45,8 @@ start_stop=$(echo "$map" | sed -n "$range")
 start=$(echo "$start_stop" | grep -o '^[^ ]\+')
 stop=$( echo "$start_stop" | grep -o '[^ ]\+$')
 
-gdb 2>/dev/null 1>&2 \
-  -q --batch --pid "$1" \
-  -ex "dump memory $filename 0x$start 0x$stop" \
+gdb \
+  >/dev/null --batch --pid "$1" \
+  -ex "dump memory $filename 0x$start 0x$stop"
 
 exit $?
