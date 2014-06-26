@@ -2,14 +2,10 @@
 
 # $1 - PID of process to dump memory of
 
-incorrect() {
-  echo "Incorrect PID: '$1'."
-  exit 1
-  }
-
 nums_only=$(echo "$1" | grep -v '[^0-9]')
 if [ -z "$1" ] || [ "$nums_only" != "$1" ] || ! [ "$1" -gt 0 ]; then
-  incorrect "$1";
+  echo "Incorrect PID: '$1'."
+  exit 1
   fi
 
 if ! [ -f "/proc/$1/maps" ]; then
