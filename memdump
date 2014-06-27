@@ -1,10 +1,11 @@
 #!/bin/sh
 
 # $1 - PID of process to dump memory of
+# $2 - optional - file name for dump
 
 nums_only=$(echo "$1" | grep -v '[^0-9]')
 if [ -z "$1" ] || [ "$nums_only" != "$1" ] || ! [ "$1" -gt 0 ]; then
-  echo "Incorrect PID: '$1'."
+  echo "Incorrect PID: '$1'"
   exit 1
   fi
 
@@ -15,7 +16,7 @@ if ! [ -f "/proc/$1/maps" ]; then
 
 maps=$(cat /proc/"$1"/maps | grep 'rw-p')
 if ! [ $(echo "$maps" | wc -l) -gt 0 ]; then
-  echo "No maps to select from."
+  echo "No maps to select from"
   exit 0
   fi
 
@@ -36,7 +37,7 @@ if [ -n "$2" ]; then
 echo "Writing memory to file: '$filename'"
 
 if [ -f "$filename" ]; then
-  echo -n "Will overwrite $filename, press Enter to continue."
+  echo -n "Will overwrite $filename, press Enter to continue"
   tty_settings=$(stty -g)
   stty -echo
   read key; # $key is never used, but must be given to read because Posix
