@@ -39,6 +39,10 @@ echo "Writing memory to file: '$filename'"
 if [ -f "$filename" ]; then
   echo -n "Will overwrite $filename, press Enter to continue"
   tty_settings=$(stty -g)
+  cleanup () {
+    stty "$tty_settings"
+    }
+  trap cleanup 1 2 3 6 14 15
   stty -echo
   read key; # $key is never used, but must be given to read because Posix
   stty "$tty_settings"
