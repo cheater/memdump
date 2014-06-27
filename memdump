@@ -29,7 +29,11 @@ if ! [ -z "$map_name" ]; then
 
 filename="$filename.mem"
 
-echo "$filename"
+if [ -n "$2" ]; then
+  filename="$2"
+  fi
+
+echo "Writing memory to file: '$filename'"
 
 if [ -f "$filename" ]; then
   echo -n "Will overwrite $filename, press Enter to continue."
