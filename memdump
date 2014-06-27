@@ -49,5 +49,7 @@ $map
 EOF
 
 gdb \
-  >/dev/null --batch --pid "$1" \
-  -ex "dump memory $filename 0x$start 0x$stop"
+  </dev/null >/dev/null -nx -batch \
+  -ex 'set pagination off' -ex 'set height 0' -ex 'set width 0' \
+  -ex "attach $1" -ex "dump memory $filename 0x$start 0x$stop" \
+  -ex 'detach' -ex 'quit'
