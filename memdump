@@ -15,19 +15,13 @@ if ! [ -f "/proc/$1/maps" ]; then
   fi
 
 maps=$(cat /proc/"$1"/maps)
-if ! [ $(echo "$maps" | wc -l) -gt 0 ]; then
-  echo "No maps to select from"
-  exit 0
-  fi
+[ "$maps" ] || echo "No maps to select from" && exit 0
 
 map=$(echo "$maps" | percol)
 
-map_name=$(echo "$map" | awk '{print $6}' | sed -e 's|/|--|g')
 filename="$1"
-if ! [ -z "$map_name" ]; then
-  filename="$filename.$map_name"
-  fi
-
+map_name=$(echo "$map" | awk '{print $6}' | sed -e 's|/|--|g')
+[ "$map_name" ] && filename="$filename.$map_name"
 filename="$filename.mem"
 
 if [ -n "$2" ]; then
@@ -37,25 +31,22 @@ if [ -n "$2" ]; then
 echo "Writing memory to file: '$filename'"
 
 if [ -f "$filename" ]; then
-  echo -n "Will overwrite $filename, press Enter to continue"
+  printf "Will overwrite $filename, press Enter to continue"
   tty_settings=$(stty -g)
   cleanup () {
     stty "$tty_settings"
     }
   trap cleanup 1 2 3 6 14 15
   stty -echo
-  read key; # $key is never used, but must be given to read because Posix
-  stty "$tty_settings"
+  read key # $key is never used, but must be given to read because POSIX
+  cleanup
   echo
   fi
 
-range='s/^\([0-9a-f]*\)-\([0-9a-f]*\) .*$/\1 \2/p'
-start_stop=$(echo "$map" | sed -n "$range")
-start=$(echo "$start_stop" | grep -o '^[^ ]\+')
-stop=$( echo "$start_stop" | grep -o '[^ ]\+$')
+IFS=' -' read -r start stop _ <<EOF
+$map
+EOF
 
 gdb \
   >/dev/null --batch --pid "$1" \
   -ex "dump memory $filename 0x$start 0x$stop"
-
-exit $?
