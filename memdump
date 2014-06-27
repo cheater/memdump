@@ -14,7 +14,7 @@ if ! [ -f "/proc/$1/maps" ]; then
   exit 1
   fi
 
-maps=$(cat /proc/"$1"/maps | grep 'rw-p')
+maps=$(cat /proc/"$1"/maps)
 if ! [ $(echo "$maps" | wc -l) -gt 0 ]; then
   echo "No maps to select from"
   exit 0
