@@ -38,7 +38,7 @@ if [ -f "$filename" ]; then
     }
   trap cleanup 1 2 3 6 14 15
   stty -echo
-  read key # $key is never used, but must be given to read because POSIX
+  read -r key # $key is never used, but must be given to read because POSIX
   cleanup
   echo
   fi
