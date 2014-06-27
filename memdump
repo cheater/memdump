@@ -15,7 +15,8 @@ if ! [ -f "/proc/$1/maps" ]; then
   fi
 
 maps=$(cat /proc/"$1"/maps)
-[ "$maps" ] || echo "No maps to select from" && exit 0
+
+[ "$maps" ] || (echo "No maps to select from" && exit 0)
 
 map=$(echo "$maps" | percol)
 
