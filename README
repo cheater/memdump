@@ -1,0 +1,4 @@
+memdump - displays /proc/[pid]/maps with percol and dumps the selected memory region.
+memgrep - greps the strings in all memory regions of a process, displays the regions and the matches
+
+You need percol to use memdump.
