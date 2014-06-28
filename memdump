@@ -20,9 +20,7 @@ maps=$(cat /proc/"$target_pid"/maps)
 
 [ "$maps" ] || { echo 'No maps to select from' && exit 0; }
 
-map=$(echo "$maps" | percol)
-percol_exit="$?"
-if [ "$percol_exit" -gt 0 ]; then
+if ! map=$(echo "$maps" | percol); then
   exit "$percol_exit"
   fi
 
