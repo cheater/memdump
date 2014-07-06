@@ -1,4 +1,21 @@
 memdump - displays /proc/[pid]/maps with percol and dumps the selected memory region.
-memgrep - greps the strings in all memory regions of a process, displays the regions and the matches
+memstrgrep - greps the strings in all memory regions of a process, displays the regions and the matches
+memgrep - greps all memory regions of a process in binary mode, displays the regions, matches, and what offsets they're at
+spread-regex - turns a single string into a string interspersed with optional characters. Useful for memgrep.
 
 You need percol to use memdump.
+
+Example usage of memgrep and spread-regex:
+
+$ sudo memgrep 19726 $(spread-regex 32 "asdfffffffff")
+b7000000-b7100000 rwxp 00000000 00:00 0 :
+983056:asdffffffffff
+995344:asdffffffffffffffffffff
+
+b7509000-b76b7000 r-xp 00000000 08:04 1182266    /lib/i386-linux-gnu/libc-2.17.so:
+62686:arch__fpending_IO_file_seekofffaccessatfgetpwent_
+71361:atat_IO_wdoallocbuf__fortify_faillldiv
+
+b76cc000-b770d000 r-xp 00000000 08:04 1182301    /lib/i386-linux-gnu/libm-2.17.so:
+14334:ardfsignificandfatan2fdremfexp2fpow
+14443:af_rremainderfscalbfilogbf__fpclassifyffmaxffminffdimf
