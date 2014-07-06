@@ -1,0 +1,21 @@
+#!/bin/sh
+
+if [ "$#" -lt "2" ]; then
+  echo 'You need to provide two parameters: the amount of chars to allow ' \
+    'between each searched char, and the string to sperad out.' >&2
+  exit 1
+  fi
+
+# $1 - how many chars to allow between each searched char
+amount="$1"
+shift
+
+if ! { echo "$amount" | grep '^[0-9]\+$' >/dev/null 2>&1; }; then
+  echo 'The amount must be a number' >&2
+  exit 1
+  fi
+
+# $2 - search string to spread out
+search="$1"
+
+echo "$search" | sed -e 's/\(.\)./\1.\\{0,10\\}/g'
