@@ -1,0 +1,77 @@
+#!/bin/sh
+
+# $1 - PID of process to grep memory of
+target_pid="$1"
+
+# the rest of arguments is passed to grep; but we need to remove the first one
+shift
+
+# extract search regex; this is passed to grep.
+search="$1"
+shift
+
+
+# First let's change to a temporary dir...
+
+# Set $TMPDIR to "/tmp" only if it didn't have a value previously
+: ${TMPDIR:=/tmp}
+
+# We can find out about $TMPDIR at:
+# http://www.opengroup.org/onlinepubs/009695399/basedefs/xbd_chap08.html
+
+# Create a private temporary directory inside $TMPDIR
+# Remove the temporary directory when the script finishes
+unset temporary_dir
+trap '[ -n "$temporary_dir" ] && rm -rf "$temporary_dir"' EXIT
+
+save_mask=$(umask)
+umask 077
+temporary_dir=$(mktemp -d "$TMPDIR/XXXXXXXXXXXXXXXXXXXXXXXXXXXXX") \
+  || { echo 'Error creating a temporary directory' >&2; exit 1; }
+umask "$save_mask"
+
+cd "$temporary_dir" \
+  || { echo 'Error changing to temporary directory' >&2; exit 1; }
+filename='memdump'
+
+
+
+# Now let's iterate over mapped memory regions and grep them.
+
+first_line=1
+while read map; do
+
+# the EOF block below may not be indented...
+IFS=' -' read -r start stop _ <<EOF
+$map
+EOF
+
+  rm -f "$filename"
+
+  gdb \
+    </dev/null >/dev/null -nx -batch \
+    -ex 'set pagination off' -ex 'set height 0' -ex 'set width 0' \
+    -ex "attach $target_pid" -ex "dump memory $filename 0x$start 0x$stop" \
+    -ex 'detach' -ex 'quit'
+
+  if ! [ -f "$filename" ]; then
+    echo "Error: gdb cannot create memory dump."
+    exit 1
+    fi
+
+  if result=$(strings "$filename" | grep "$search" "$@"); then
+    if [ "$first_line" -gt 0 ]; then
+      first_line=0
+    else
+      echo
+      fi
+
+    echo "$map:"
+    echo "$result" | while read line; do
+      if ! { echo "$line" | grep "$search" --color=auto; }; then
+        echo "$line"
+        fi
+      done
+    fi
+
+  done < /proc/"$target_pid"/maps
