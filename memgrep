@@ -76,7 +76,11 @@ EOF
       fi
 
     echo "$map:"
-    echo "$result" | grep --color=auto "$@"
+    echo "$result" | cat -v | while read line; do
+      if ! { echo "$line" | grep "$search" --color=auto; }; then
+        echo "$line"
+        fi
+      done
     fi
 
   done < /proc/"$target_pid"/maps
