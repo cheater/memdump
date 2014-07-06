@@ -6,6 +6,10 @@ target_pid="$1"
 # the rest of arguments is passed to grep; but we need to remove the first one
 shift
 
+# extract search regex; this is passed to grep.
+search="$1"
+shift
+
 
 
 # First let's change to a temporary dir...
@@ -56,7 +60,15 @@ EOF
     exit 1
     fi
 
-  if result=$(strings "$filename" | grep "$@"); then
+  if result=$(grep "$search" \
+      --binary               \
+      --byte-offset          \
+      --no-filename          \
+      --only-matching        \
+      --binary-files=text    \
+      "$@"                   \
+      "$filename"
+      ); then
     if [ "$first_line" -gt 0 ]; then
       first_line=0
     else
