@@ -18,4 +18,6 @@ if ! { echo "$amount" | grep '^[0-9]\+$' >/dev/null 2>&1; }; then
 # $2 - search string to spread out
 search="$1"
 
-echo "$search" | sed -e 's/\(.\)./\1.\\{0,10\\}/g'
+echo "$search" \
+  | sed -e 's/./&.\\{0,'"$amount"'\\}/g' \
+  | sed -e 's/\.\\{0,'"$amount"'\\}$//g'
