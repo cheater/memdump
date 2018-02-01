@@ -25,9 +25,9 @@ shift
 unset temporary_dir
 trap '[ -n "$temporary_dir" ] && rm -rf "$temporary_dir"' EXIT
 
-save_mask=$(umask)
+save_mask="$(umask)"
 umask 077
-temporary_dir=$(mktemp -d "$TMPDIR/XXXXXXXXXXXXXXXXXXXXXXXXXXXXX") \
+temporary_dir="$(mktemp -d "$TMPDIR/XXXXXXXXXXXXXXXXXXXXXXXXXXXXX")" \
   || { echo 'Error creating a temporary directory' >&2; exit 1; }
 umask "$save_mask"
 
@@ -60,7 +60,7 @@ EOF
     exit 1
     fi
 
-  if result=$(grep "$search" \
+  if result="$(grep "$search" \
       --binary               \
       --byte-offset          \
       --no-filename          \
@@ -68,7 +68,7 @@ EOF
       --binary-files=text    \
       "$@"                   \
       "$filename"
-      ); then
+      )"; then
     if [ "$first_line" -gt 0 ]; then
       first_line=0
     else
