@@ -22,7 +22,7 @@ search="$1"
 
 if [ "$amount" -lt 0 ]; then
   amount=$((0-amount))
-  search=$(echo "$search" | awk '
+  search="$(echo "$search" | awk '
     {
       for (i=length; i!=0; i--) {
         rev=rev substr($0,i,1)  # append one char to string rev
@@ -30,7 +30,7 @@ if [ "$amount" -lt 0 ]; then
       }
     END {
       print rev
-      }')
+      }')"
   fi
 
 echo "$search" \
