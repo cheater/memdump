@@ -1,11 +1,16 @@
 #!/bin/sh
 
-# $1 - PID of process to dump memory of
-target_pid="$1"
+# Dump the memory of a process indicated by its PID. Requires that you have
+# percol and gdb installed. Needs to be run as root.
 
+# Arguments:
+#
+# $1 - PID of process to dump memory of
 # $2 - optional - file name for dump
 
-nums_only=$(echo "$target_pid" | grep -v '[^0-9]')
+target_pid="$1"
+
+nums_only="$(echo "$target_pid" | grep -v '[^0-9]')"
 if [ -z "$target_pid" ] || [ "$nums_only" != "$target_pid" ] || ! [ "$target_pid" -gt 0 ]; then
   echo "Incorrect PID: '$target_pid'"
   exit 1
@@ -16,16 +21,16 @@ if ! [ -f "/proc/$target_pid/maps" ]; then
   exit 1
   fi
 
-maps=$(cat /proc/"$target_pid"/maps)
+maps="$(cat /proc/"$target_pid"/maps)"
 
 [ "$maps" ] || { echo 'No maps to select from' && exit 0; }
 
-if ! map=$(echo "$maps" | percol); then
+if ! map="$(echo "$maps" | percol)"; then
   exit "$percol_exit"
   fi
 
 filename="$target_pid"
-map_name=$(echo "$map" | awk '{print $6}' | sed -e 's|/|--|g')
+map_name="$(echo "$map" | awk '{print $6}' | sed -e 's|/|--|g')"
 [ "$map_name" ] && filename="$filename.$map_name"
 filename="$filename.mem"
 
@@ -37,7 +42,7 @@ echo "Writing memory to file: '$filename'"
 
 if [ -f "$filename" ]; then
   printf "Will overwrite $filename, press Enter to continue"
-  tty_settings=$(stty -g)
+  tty_settings="$(stty -g)"
   cleanup () {
     stty "$tty_settings"
     }
